@@ -1,6 +1,6 @@
 {
-  "gif_path": "test.gif",
-  "beats_per_gif": 4,
+  "gif_path": "gif/11.gif",
+  "beats_per_gif": 2,
   "sensitivity": 1.45,
   "min_bpm": 60,
   "max_bpm": 200,
