@@ -1,4 +1,7 @@
 {
+  "fig_folder": "gif",
+  "left_click_next_gif": true,
+  "drag_threshold": 6,
   "gif_path": "gif/11.gif",
   "beats_per_gif": 2,
   "sensitivity": 1.45,
