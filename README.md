@@ -41,7 +41,7 @@ beat_gif_player/
 ├── config.json
 ├── requirements.txt
 ├── README.md
-└── fig/
+└── gif/
     ├── 1.gif
     ├── 2.gif
     └── 3.gif
@@ -66,33 +66,29 @@ python main.py
 
 ```json
 {
-  "gif_path": "",
-  "fig_folder": "fig",
+  "fig_folder": "gif",
   "left_click_next_gif": true,
   "drag_threshold": 6,
-
-  "beats_per_gif": 4,
+  "gif_path": "gif/11.gif",
+  "beats_per_gif": 2,
   "sensitivity": 1.45,
   "min_bpm": 60,
   "max_bpm": 200,
   "initial_bpm": 120,
-
-  "sample_rate": 48000,
-  "block_size": 2048,
-
-  "window_width": 360,
-  "window_height": 360,
+  "sample_rate": 44100,
+  "block_size": 1024,
+  "window_width": 100,
+  "window_height": 100,
   "window_scale": 1.0,
   "start_x": 200,
   "start_y": 200,
   "always_on_top": true,
-
   "restart_on_trigger": false,
   "close_button_autohide_ms": 3000,
-
   "align_loop_to_beat": true,
   "max_loop_time_adjust_ratio": 0.25
 }
+
 ```
 
 ## 参数说明
@@ -110,7 +106,7 @@ python main.py
 
 | 参数              | 含义                      |
 | --------------- | ----------------------- |
-| `beats_per_gif` | GIF 一轮对应多少拍，默认 4        |
+| `beats_per_gif` | GIF 一轮对应多少拍，默认 2        |
 | `sensitivity`   | 节奏检测灵敏度，越小越敏感           |
 | `min_bpm`       | 允许估计的最低 BPM             |
 | `max_bpm`       | 允许估计的最高 BPM             |
