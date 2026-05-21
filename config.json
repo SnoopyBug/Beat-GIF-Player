@@ -1,0 +1,20 @@
+{
+  "gif_path": "test.gif",
+  "beats_per_gif": 4,
+  "sensitivity": 1.45,
+  "min_bpm": 60,
+  "max_bpm": 200,
+  "initial_bpm": 120,
+  "sample_rate": 44100,
+  "block_size": 1024,
+  "window_width": 64,
+  "window_height": 64,
+  "window_scale": 1.0,
+  "start_x": 200,
+  "start_y": 200,
+  "always_on_top": true,
+  "restart_on_trigger": false,
+  "close_button_autohide_ms": 3000,
+  "align_loop_to_beat": true,
+  "max_loop_time_adjust_ratio": 0.25
+}
