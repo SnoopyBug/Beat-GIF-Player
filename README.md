@@ -1,83 +1,198 @@
 # Beat GIF Player
 
-一个 Windows Python 小应用：监听系统正在播放的音乐，实时估计节奏/BPM，并让 GIF 悬浮窗持续循环播放。当前版本不会在鼓点处强制从第一帧重播，而是 **每次 GIF 完整播放一遍后，根据最近估计的 BPM 调整下一轮播放速度，并尽量让下一次回到第一帧的时刻贴近节拍网格**，画面更自然。
+一个 Windows 悬浮 GIF 播放器。程序会监听系统正在播放的音乐，实时估计节奏和 BPM，让 GIF 按节奏循环播放，并尽量让每轮 GIF 的起始点贴近节拍。
 
 ## 功能
 
-- Windows 系统音频 WASAPI loopback 监听。
-- 实时能量峰值检测 + BPM 平滑估计。
-- 无边框、置顶、可拖动 GIF 悬浮窗。
-- 窗口大小固定，由 `window_width` / `window_height` 配置。
-- GIF 会保持原始宽高比，完整适配到固定窗口尺寸内，居中显示。
-- GIF 一直循环播放。
-- 每轮 GIF 播放结束后，按最近 BPM 调整下一轮速度。
-- 一轮 GIF 的目标时长 = `beats_per_gif × 当前估计每拍时长`。
-- 可选节拍对齐：让下一次 GIF 回到第一帧的时刻尽量靠近 `beats_per_gif` 对应的节拍边界。
-- 右键点击 GIF 后显示“关闭”按钮。
-- 使用 `config.json` 配置。
+- 监听 Windows 系统音频
+- 根据音乐节奏估计 BPM
+- GIF 无边框、置顶、可拖动显示
+- GIF 按比例适配固定窗口大小
+- 每轮 GIF 播放完后，根据最新 BPM 调整下一轮速度
+- 左键点击切换 `fig` 文件夹中的下一个 GIF
+- 右键显示“关闭”按钮
 
-## 安装
+## 环境
 
-建议使用 Python 3.10+。
+推荐：
 
 ```bash
-cd beat_gif_player
-python -m venv .venv
-.venv\Scripts\activate
+Windows 10 / Windows 11
+Python 3.10+
+````
+
+安装依赖：
+
+```bash
+pip install numpy pillow PySide6 soundcard
+```
+
+或：
+
+```bash
 pip install -r requirements.txt
 ```
 
-## 配置
+## 项目结构
 
-编辑 `config.json`：
+```text
+beat_gif_player/
+├── main.py
+├── config.json
+├── requirements.txt
+├── README.md
+└── fig/
+    ├── 1.gif
+    ├── 2.gif
+    └── 3.gif
+```
+
+## 运行
+
+```bash
+python main.py
+```
+
+## 鼠标操作
+
+```text
+左键点击：切换下一个 GIF
+左键拖动：移动窗口
+右键点击：显示关闭按钮
+点击关闭：退出程序
+```
+
+## config.json 示例
 
 ```json
 {
-  "gif_path": "C:/Users/you/Pictures/your.gif",
+  "gif_path": "",
+  "fig_folder": "fig",
+  "left_click_next_gif": true,
+  "drag_threshold": 6,
+
   "beats_per_gif": 4,
   "sensitivity": 1.45,
+  "min_bpm": 60,
+  "max_bpm": 200,
   "initial_bpm": 120,
+
+  "sample_rate": 48000,
+  "block_size": 2048,
+
   "window_width": 360,
   "window_height": 360,
+  "window_scale": 1.0,
+  "start_x": 200,
+  "start_y": 200,
+  "always_on_top": true,
+
+  "restart_on_trigger": false,
+  "close_button_autohide_ms": 3000,
+
   "align_loop_to_beat": true,
   "max_loop_time_adjust_ratio": 0.25
 }
 ```
 
-常用参数：
+## 参数说明
 
-- `gif_path`：本地 GIF 文件路径。Windows 路径建议使用 `/`，例如 `C:/Users/you/Desktop/a.gif`。
-- `beats_per_gif`：GIF 完整播放一遍对应多少拍。比如 BPM=120 且 `beats_per_gif=4`，一轮 GIF 时长为 2 秒。
-- `sensitivity`：节奏触发灵敏度，越小越容易检测到拍点，越大越保守。建议范围：`1.1 ~ 2.2`。
-- `initial_bpm`：程序刚启动、还没估计出 BPM 时的默认播放速度。
-- `min_bpm` / `max_bpm`：限制 BPM 估计范围，避免误判成过慢或过快。
-- `window_width`：悬浮窗固定宽度，单位像素。
-- `window_height`：悬浮窗固定高度，单位像素。
-- `block_size`：音频块大小。`512` 响应更快，`1024` 平衡，`2048` 更稳但延迟更高。
-- `close_button_autohide_ms`：右键显示“关闭”按钮后的自动隐藏时间，单位毫秒。
-- `align_loop_to_beat`：是否启用 GIF 循环边界贴拍。启用后不会中途重播，而是在一轮结束时调整下一轮时长，使下一次回到第一帧尽量靠近节拍。
-- `max_loop_time_adjust_ratio`：每轮允许相对名义时长的最大拉伸/压缩比例。默认 `0.25` 表示最多 ±25%。调大更贴拍但速度变化更明显；调小更平滑但对齐更慢。
+### GIF 相关
 
-## 运行
+| 参数                    | 含义                       |
+| --------------------- | ------------------------ |
+| `gif_path`            | 默认 GIF 路径，可为空            |
+| `fig_folder`          | GIF 文件夹，左键点击时依次切换其中的 GIF |
+| `left_click_next_gif` | 是否启用左键切换 GIF             |
+| `drag_threshold`      | 区分点击和拖动的像素阈值             |
 
-```bash
-cd Beat-GIF-Player
-python main.py
+### 节奏相关
+
+| 参数              | 含义                      |
+| --------------- | ----------------------- |
+| `beats_per_gif` | GIF 一轮对应多少拍，默认 4        |
+| `sensitivity`   | 节奏检测灵敏度，越小越敏感           |
+| `min_bpm`       | 允许估计的最低 BPM             |
+| `max_bpm`       | 允许估计的最高 BPM             |
+| `initial_bpm`   | 启动时尚未检测到 BPM 前使用的默认 BPM |
+
+### 音频相关
+
+| 参数            | 含义                     |
+| ------------- | ---------------------- |
+| `sample_rate` | 音频采样率，常用 44100 或 48000 |
+| `block_size`  | 音频块大小，越大越稳定但延迟越高       |
+
+### 窗口相关
+
+| 参数                         | 含义                |
+| -------------------------- | ----------------- |
+| `window_width`             | 悬浮窗宽度             |
+| `window_height`            | 悬浮窗高度             |
+| `window_scale`             | 兼容旧版本，一般保持 1.0    |
+| `start_x`                  | 窗口初始横坐标           |
+| `start_y`                  | 窗口初始纵坐标           |
+| `always_on_top`            | 是否置顶              |
+| `close_button_autohide_ms` | 右键关闭按钮自动隐藏时间，单位毫秒 |
+
+### 播放策略相关
+
+| 参数                           | 含义                   |
+| ---------------------------- | -------------------- |
+| `restart_on_trigger`         | 兼容旧版本，当前建议保持 `false` |
+| `align_loop_to_beat`         | 是否让 GIF 每轮起点尽量贴近节拍   |
+| `max_loop_time_adjust_ratio` | 每轮 GIF 最大速度调整比例      |
+
+## 调参建议
+
+如果 GIF 反应不明显：
+
+```json
+"sensitivity": 1.25
 ```
 
-先播放音乐，再启动程序通常更容易选中正确的系统回放设备。
+如果误触发太多：
 
-## 当前播放策略
+```json
+"sensitivity": 1.8
+```
 
-旧策略：每到触发点就立即从第一帧重新播放 GIF。  
-新策略：GIF 一直循环播放；检测器只更新最近 BPM 和最近 beat 相位；当 GIF 播完一整轮、准备回到第一帧时，才调整下一轮的帧间隔。
+如果音频采集不稳定：
 
-如果 `align_loop_to_beat=true`，程序会预测下一次 `beats_per_gif` 拍边界，并在 `max_loop_time_adjust_ratio` 允许的范围内拉伸/压缩下一轮 GIF，让下一次回到第一帧的时刻尽量贴近节拍。这样不会在播放中途突然跳回第一帧，画面更自然。
+```json
+"sample_rate": 48000,
+"block_size": 2048
+```
 
-## 注意
+如果 GIF 速度变化太明显：
 
-1. 这个版本使用实时能量峰值检测，适合鼓点/节奏明显的音乐。复杂音乐可能会误判或漏判。
-2. 程序启动后通常需要 2~4 个拍子来稳定 BPM，启动初期会使用 `initial_bpm`。
-3. 如果无法捕获系统声音，请确认 Windows 输出设备正常，并尝试重启程序。
-4. 某些蓝牙/虚拟声卡设备可能无法被 `soundcard` 正确 loopback 捕获。
-5. GIF 会按比例缩放到 `window_width × window_height` 内，不会拉伸变形；如果窗口比例与 GIF 比例不同，会留出透明空白。
+```json
+"max_loop_time_adjust_ratio": 0.15
+```
+
+如果不想贴拍，只想按 BPM 调速：
+
+```json
+"align_loop_to_beat": false
+```
+
+## 常见提示
+
+如果看到：
+
+```text
+QWindowsContext: OleInitialize() failed
+```
+
+但程序能正常运行，可以忽略。
+
+如果看到：
+
+```text
+SoundcardRuntimeWarning: data discontinuity in recording
+```
+
+表示音频采集有短暂不连续。偶尔出现可以忽略；频繁出现时可增大 `block_size`。
+
+```
+```
