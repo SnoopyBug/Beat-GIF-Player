@@ -61,6 +61,7 @@ pip install -r requirements.txt
 ## 运行
 
 ```bash
+cd Beat-GIF-Player
 python main.py
 ```
 
