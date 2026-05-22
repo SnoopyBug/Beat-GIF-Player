@@ -3,7 +3,7 @@
   "left_click_next_gif": true,
   "drag_threshold": 6,
   "gif_path": "gif/11.gif",
-  "beats_per_gif": 2,
+  "beats_per_gif": 1,
   "sensitivity": 1.45,
   "min_bpm": 60,
   "max_bpm": 200,
